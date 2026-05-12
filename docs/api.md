@@ -84,3 +84,22 @@ DELETE /api/v1/vehicles/{id}
 ```
 
 Protected endpoints must validate JWT, role, and company scope.
+
+## Authorization
+
+Role authorization is enforced from validated JWT claims stored in request context. Roles are never accepted from request bodies.
+
+Supported roles:
+
+- `super_admin`
+- `company_admin`
+- `operator`
+- `driver`
+
+Authorization errors use JSON responses:
+
+```json
+{
+  "error": "forbidden"
+}
+```

@@ -22,10 +22,10 @@ Completed:
 - JWT generation and validation service
 - auth login and me HTTP handlers
 - JWT authentication middleware for protected routes
+- role authorization middleware helpers
 - verified local health/readiness endpoints on port 18080
 - internal documentation structure
 
 Next:
 
-- add role authorization middleware
 - add companies/users application use cases when backend code needs them
