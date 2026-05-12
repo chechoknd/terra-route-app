@@ -69,15 +69,14 @@ func TestHandlerLoginRejectsInvalidCredentials(t *testing.T) {
 }
 
 func TestHandlerMe(t *testing.T) {
+	claims := &authdomain.TokenClaims{
+		UserID:    "user-1",
+		CompanyID: "company-1",
+		Role:      userdomain.UserRoleOperator,
+	}
 	handler := NewHandler(
 		&fakeLoginUseCase{},
-		&fakeTokenService{
-			claims: &authdomain.TokenClaims{
-				UserID:    "user-1",
-				CompanyID: "company-1",
-				Role:      userdomain.UserRoleOperator,
-			},
-		},
+		&fakeTokenService{},
 		&fakeUserReader{
 			user: &userdomain.User{
 				ID:        "user-1",
@@ -89,8 +88,7 @@ func TestHandlerMe(t *testing.T) {
 			},
 		},
 	)
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/me", nil)
-	req.Header.Set("Authorization", "Bearer token")
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/me", nil).WithContext(contextWithAuthClaims(context.Background(), claims))
 	rec := httptest.NewRecorder()
 
 	handler.Me(rec, req)
@@ -108,22 +106,9 @@ func TestHandlerMe(t *testing.T) {
 	}
 }
 
-func TestHandlerMeRejectsMissingToken(t *testing.T) {
+func TestHandlerMeRejectsMissingAuthContext(t *testing.T) {
 	handler := NewHandler(&fakeLoginUseCase{}, &fakeTokenService{}, &fakeUserReader{})
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/me", nil)
-	rec := httptest.NewRecorder()
-
-	handler.Me(rec, req)
-
-	if rec.Code != http.StatusUnauthorized {
-		t.Fatalf("expected status 401, got %d", rec.Code)
-	}
-}
-
-func TestHandlerMeRejectsInvalidToken(t *testing.T) {
-	handler := NewHandler(&fakeLoginUseCase{}, &fakeTokenService{err: authdomain.ErrInvalidToken}, &fakeUserReader{})
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/me", nil)
-	req.Header.Set("Authorization", "Bearer bad-token")
 	rec := httptest.NewRecorder()
 
 	handler.Me(rec, req)
@@ -143,15 +128,17 @@ func (uc *fakeLoginUseCase) Execute(_ context.Context, _ dto.LoginRequest) (*dto
 }
 
 type fakeTokenService struct {
-	claims *authdomain.TokenClaims
-	err    error
+	claims         *authdomain.TokenClaims
+	err            error
+	validatedToken string
 }
 
 func (s *fakeTokenService) Generate(_ context.Context, _ authdomain.TokenSubject) (string, error) {
 	return "token", nil
 }
 
-func (s *fakeTokenService) Validate(_ context.Context, _ string) (*authdomain.TokenClaims, error) {
+func (s *fakeTokenService) Validate(_ context.Context, token string) (*authdomain.TokenClaims, error) {
+	s.validatedToken = token
 	return s.claims, s.err
 }
 

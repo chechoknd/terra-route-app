@@ -21,6 +21,58 @@ GET /readyz
 
 Checks PostgreSQL connectivity.
 
+### Authentication
+
+```http
+POST /api/v1/auth/login
+```
+
+Authenticates a company-scoped user and returns an access token.
+
+Request body:
+
+```json
+{
+  "company_id": "company uuid",
+  "email": "operator@example.com",
+  "password": "user password"
+}
+```
+
+Successful response:
+
+```json
+{
+  "access_token": "jwt access token",
+  "token_type": "Bearer",
+  "user": {
+    "id": "user uuid",
+    "company_id": "company uuid",
+    "email": "operator@example.com",
+    "full_name": "Operator Name",
+    "role": "operator",
+    "status": "active",
+    "created_at": "timestamp",
+    "updated_at": "timestamp"
+  }
+}
+```
+
+```http
+GET /api/v1/auth/me
+Authorization: Bearer <access_token>
+```
+
+Returns the authenticated active user. This endpoint is protected by JWT authentication middleware.
+
+Authentication errors use JSON responses:
+
+```json
+{
+  "error": "invalid_token"
+}
+```
+
 ## Planned Conventions
 
 ```http

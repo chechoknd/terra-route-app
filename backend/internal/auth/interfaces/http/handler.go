@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/terraroute/terra-route/backend/internal/auth/application/dto"
 	authdomain "github.com/terraroute/terra-route/backend/internal/auth/domain"
@@ -76,19 +75,9 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
-	tokenValue, ok := bearerToken(r.Header.Get("Authorization"))
+	claims, ok := AuthClaimsFromContext(r.Context())
 	if !ok {
-		writeError(w, http.StatusUnauthorized, "missing_token")
-		return
-	}
-
-	claims, err := h.tokens.Validate(r.Context(), tokenValue)
-	if errors.Is(err, authdomain.ErrInvalidToken) {
 		writeError(w, http.StatusUnauthorized, "invalid_token")
-		return
-	}
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "internal_error")
 		return
 	}
 
@@ -118,14 +107,6 @@ func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 			UpdatedAt: user.UpdatedAt,
 		},
 	})
-}
-
-func bearerToken(header string) (string, bool) {
-	parts := strings.Fields(header)
-	if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") || strings.TrimSpace(parts[1]) == "" {
-		return "", false
-	}
-	return parts[1], true
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {
