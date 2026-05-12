@@ -1,0 +1,33 @@
+.env
+.env.*
+!.env.example
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+
+# Go
+backend/api
+backend/bin/
+backend/tmp/
+backend/coverage.out
+
+# Node/Angular
+admin-web/node_modules/
+admin-web/dist/
+admin-web/.angular/
+
+# Flutter
+mobile-driver/.dart_tool/
+mobile-driver/.packages
+mobile-driver/build/
+mobile-driver/.flutter-plugins
+mobile-driver/.flutter-plugins-dependencies
+
+# Local data
+postgres-data/
