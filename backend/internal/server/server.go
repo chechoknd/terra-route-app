@@ -3,17 +3,25 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	authusecases "github.com/terraroute/terra-route/backend/internal/auth/application/usecases"
+	authinfra "github.com/terraroute/terra-route/backend/internal/auth/infrastructure"
+	authhttp "github.com/terraroute/terra-route/backend/internal/auth/interfaces/http"
+	userinfra "github.com/terraroute/terra-route/backend/internal/users/infrastructure"
 )
 
 type Config struct {
-	Addr   string
-	DB     *pgxpool.Pool
-	Logger *slog.Logger
+	Addr         string
+	DB           *pgxpool.Pool
+	Logger       *slog.Logger
+	JWTSecret    string
+	JWTExpiresIn string
 }
 
 type Server struct {
@@ -22,7 +30,7 @@ type Server struct {
 	logger     *slog.Logger
 }
 
-func New(cfg Config) *Server {
+func New(cfg Config) (*Server, error) {
 	mux := http.NewServeMux()
 
 	srv := &Server{
@@ -30,9 +38,19 @@ func New(cfg Config) *Server {
 		logger: cfg.Logger,
 	}
 
+	userRepo := userinfra.NewPostgresRepository(cfg.DB)
+	passwordHasher := authinfra.NewBcryptPasswordHasher(0)
+	tokenService, err := authinfra.NewJWTService(cfg.JWTSecret, cfg.JWTExpiresIn)
+	if err != nil {
+		return nil, fmt.Errorf("create jwt service: %w", err)
+	}
+	loginUseCase := authusecases.NewLoginUseCase(userRepo, passwordHasher, tokenService)
+	authHandler := authhttp.NewHandler(loginUseCase, tokenService, userRepo)
+
 	mux.HandleFunc("GET /healthz", srv.handleHealth)
 	mux.HandleFunc("GET /readyz", srv.handleReady)
 	mux.HandleFunc("GET /api/v1/healthz", srv.handleHealth)
+	authhttp.RegisterRoutes(mux, authHandler)
 
 	srv.httpServer = &http.Server{
 		Addr:              cfg.Addr,
@@ -43,7 +61,7 @@ func New(cfg Config) *Server {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	return srv
+	return srv, nil
 }
 
 func (s *Server) Start() error {

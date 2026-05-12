@@ -29,11 +29,17 @@ func main() {
 	}
 	defer dbpool.Close()
 
-	app := server.New(server.Config{
-		Addr:   cfg.HTTPAddr,
-		DB:     dbpool,
-		Logger: logger,
+	app, err := server.New(server.Config{
+		Addr:         cfg.HTTPAddr,
+		DB:           dbpool,
+		Logger:       logger,
+		JWTSecret:    cfg.JWTSecret,
+		JWTExpiresIn: cfg.JWTExpiresIn,
 	})
+	if err != nil {
+		logger.Error("server setup failed", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
 
 	errCh := make(chan error, 1)
 	go func() {
