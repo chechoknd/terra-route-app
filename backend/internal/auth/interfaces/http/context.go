@@ -8,8 +8,12 @@ import (
 
 type authClaimsContextKey struct{}
 
-func contextWithAuthClaims(ctx context.Context, claims *authdomain.TokenClaims) context.Context {
+func ContextWithAuthClaims(ctx context.Context, claims *authdomain.TokenClaims) context.Context {
 	return context.WithValue(ctx, authClaimsContextKey{}, claims)
+}
+
+func contextWithAuthClaims(ctx context.Context, claims *authdomain.TokenClaims) context.Context {
+	return ContextWithAuthClaims(ctx, claims)
 }
 
 func AuthClaimsFromContext(ctx context.Context) (*authdomain.TokenClaims, bool) {

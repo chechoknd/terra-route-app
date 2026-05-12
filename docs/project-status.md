@@ -1,6 +1,6 @@
 # Project Status
 
-Status: Sprint 1 started.
+Status: Sprint 2 started.
 
 Completed:
 
@@ -24,9 +24,26 @@ Completed:
 - JWT authentication middleware for protected routes
 - role authorization middleware helpers
 - local development seed workflow and demo users
+- vehicles database schema migration
+- vehicle domain entity and PostgreSQL repository
+- vehicle application use cases
+- vehicle HTTP handlers and protected REST routes
+- drivers database schema migration
+- driver domain entity and PostgreSQL repository
+- driver application use cases
+- driver HTTP handlers and protected REST routes
+- routes database schema migration
+- route domain entity and PostgreSQL repository
+- route application use cases
+- route HTTP handlers and protected REST routes
+- route stops database schema migration
+- route stop domain entity and PostgreSQL repository
+- route stop application use cases
+- route stop HTTP handlers and protected nested REST routes
+- Sprint 2 operational catalog authorization and tenant-scope hardening
 - verified local health/readiness endpoints on port 18080
 - internal documentation structure
 
 Next:
 
-- add companies/users application use cases when backend code needs them
+- continue Sprint 2 operational entities or start trip planning when ready

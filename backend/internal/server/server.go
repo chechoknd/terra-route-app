@@ -13,7 +13,19 @@ import (
 	authusecases "github.com/terraroute/terra-route/backend/internal/auth/application/usecases"
 	authinfra "github.com/terraroute/terra-route/backend/internal/auth/infrastructure"
 	authhttp "github.com/terraroute/terra-route/backend/internal/auth/interfaces/http"
+	driverusecases "github.com/terraroute/terra-route/backend/internal/drivers/application/usecases"
+	driverinfra "github.com/terraroute/terra-route/backend/internal/drivers/infrastructure"
+	driverhttp "github.com/terraroute/terra-route/backend/internal/drivers/interfaces/http"
+	routestopusecases "github.com/terraroute/terra-route/backend/internal/route_stops/application/usecases"
+	routestopinfra "github.com/terraroute/terra-route/backend/internal/route_stops/infrastructure"
+	routestophttp "github.com/terraroute/terra-route/backend/internal/route_stops/interfaces/http"
+	routeusecases "github.com/terraroute/terra-route/backend/internal/routes/application/usecases"
+	routeinfra "github.com/terraroute/terra-route/backend/internal/routes/infrastructure"
+	routehttp "github.com/terraroute/terra-route/backend/internal/routes/interfaces/http"
 	userinfra "github.com/terraroute/terra-route/backend/internal/users/infrastructure"
+	vehicleusecases "github.com/terraroute/terra-route/backend/internal/vehicles/application/usecases"
+	vehicleinfra "github.com/terraroute/terra-route/backend/internal/vehicles/infrastructure"
+	vehiclehttp "github.com/terraroute/terra-route/backend/internal/vehicles/interfaces/http"
 )
 
 type Config struct {
@@ -47,10 +59,49 @@ func New(cfg Config) (*Server, error) {
 	loginUseCase := authusecases.NewLoginUseCase(userRepo, passwordHasher, tokenService)
 	authHandler := authhttp.NewHandler(loginUseCase, tokenService, userRepo)
 
+	vehicleRepo := vehicleinfra.NewPostgresRepository(cfg.DB)
+	vehicleHandler := vehiclehttp.NewHandler(
+		vehicleusecases.NewCreateVehicleUseCase(vehicleRepo),
+		vehicleusecases.NewUpdateVehicleUseCase(vehicleRepo),
+		vehicleusecases.NewGetVehicleUseCase(vehicleRepo),
+		vehicleusecases.NewListVehiclesUseCase(vehicleRepo),
+		vehicleusecases.NewDeactivateVehicleUseCase(vehicleRepo),
+	)
+
+	driverRepo := driverinfra.NewPostgresRepository(cfg.DB)
+	driverHandler := driverhttp.NewHandler(
+		driverusecases.NewCreateDriverUseCase(driverRepo),
+		driverusecases.NewUpdateDriverUseCase(driverRepo),
+		driverusecases.NewGetDriverUseCase(driverRepo),
+		driverusecases.NewListDriversUseCase(driverRepo),
+		driverusecases.NewDeactivateDriverUseCase(driverRepo),
+	)
+
+	routeRepo := routeinfra.NewPostgresRepository(cfg.DB)
+	routeHandler := routehttp.NewHandler(
+		routeusecases.NewCreateRouteUseCase(routeRepo),
+		routeusecases.NewUpdateRouteUseCase(routeRepo),
+		routeusecases.NewGetRouteUseCase(routeRepo),
+		routeusecases.NewListRoutesUseCase(routeRepo),
+		routeusecases.NewArchiveRouteUseCase(routeRepo),
+	)
+
+	routeStopRepo := routestopinfra.NewPostgresRepository(cfg.DB)
+	routeStopHandler := routestophttp.NewHandler(
+		routestopusecases.NewAddRouteStopUseCase(routeStopRepo),
+		routestopusecases.NewUpdateRouteStopUseCase(routeStopRepo),
+		routestopusecases.NewListRouteStopsUseCase(routeStopRepo),
+		routestopusecases.NewDeleteRouteStopUseCase(routeStopRepo),
+	)
+
 	mux.HandleFunc("GET /healthz", srv.handleHealth)
 	mux.HandleFunc("GET /readyz", srv.handleReady)
 	mux.HandleFunc("GET /api/v1/healthz", srv.handleHealth)
 	authhttp.RegisterRoutes(mux, authHandler)
+	vehiclehttp.RegisterRoutes(mux, vehicleHandler, tokenService)
+	driverhttp.RegisterRoutes(mux, driverHandler, tokenService)
+	routehttp.RegisterRoutes(mux, routeHandler, tokenService)
+	routestophttp.RegisterRoutes(mux, routeStopHandler, tokenService)
 
 	srv.httpServer = &http.Server{
 		Addr:              cfg.Addr,
