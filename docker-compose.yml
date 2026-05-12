@@ -48,5 +48,27 @@ services:
       postgres:
         condition: service_healthy
 
+  seed-local:
+    image: postgres:16-alpine
+    profiles:
+      - tools
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-terraroute_dev_password}
+    volumes:
+      - ./backend/seeds:/seeds:ro
+    command:
+      - psql
+      - -h
+      - postgres
+      - -U
+      - ${POSTGRES_USER:-terraroute}
+      - -d
+      - ${POSTGRES_DB:-terraroute}
+      - -f
+      - /seeds/local_dev.sql
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres-data:

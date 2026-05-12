@@ -23,6 +23,7 @@ Completed:
 - auth login and me HTTP handlers
 - JWT authentication middleware for protected routes
 - role authorization middleware helpers
+- local development seed workflow and demo users
 - verified local health/readiness endpoints on port 18080
 - internal documentation structure
 
