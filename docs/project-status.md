@@ -1,6 +1,6 @@
 # Project Status
 
-Status: MVP foundation.
+Status: Sprint 1 started.
 
 Completed:
 
@@ -14,11 +14,14 @@ Completed:
 - graceful shutdown
 - migration directory
 - initial PostGIS migration
+- companies and users schema migration
+- company and user domain entities
+- company and user PostgreSQL repositories
 - verified local health/readiness endpoints on port 18080
 - internal documentation structure
 
 Next:
 
-- add migration runner workflow
-- implement companies and users schema
 - add JWT auth and role middleware
+- implement login use case
+- add companies/users application use cases when backend code needs them

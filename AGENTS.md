@@ -34,6 +34,36 @@ DO NOT:
 
 ## Security Rules
 
+# BRANCH WORKFLOW RULES
+
+CRITICAL:
+
+NEVER work directly on `main`.
+
+Before making any code changes, always:
+
+1. Check the current branch.
+2. If the current branch is `main`, stop and create a feature branch.
+3. Use a branch name that follows the project convention.
+
+Branch naming:
+
+- feature/module-name
+- fix/module-name
+- refactor/module-name
+- chore/module-name
+
+Examples:
+
+- chore/sprint-0-foundation
+- feature/auth-companies-users
+- feature/vehicles-crud
+- fix/docker-postgis-config
+
+All implementation work must happen in a non-main branch.
+
+The `main` branch must only receive changes through Pull Requests.
+
 NEVER commit:
 - `.env` files
 - secrets
