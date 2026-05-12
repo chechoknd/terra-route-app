@@ -45,6 +45,14 @@ The MVP focuses on secure login, vehicles, drivers, routes, trips, GPS tracking,
    make migrate-up
    ```
 
+5. Optional: seed local-only demo data:
+
+   ```sh
+   make seed-local
+   ```
+
+   Demo credentials are documented in `docs/dev-setup.md`.
+
 ## Backend
 
 The backend is a Go modular monolith using lightweight clean architecture. It exposes versioned REST endpoints under `/api/v1` and will later include WebSocket location streams.
@@ -53,6 +61,8 @@ Current endpoints:
 
 - `GET /healthz`
 - `GET /readyz`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/auth/me`
 
 ## Development Rules
 

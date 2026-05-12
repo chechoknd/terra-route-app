@@ -1,6 +1,6 @@
 SHELL := /bin/sh
 
-.PHONY: help backend-run backend-test backend-fmt backend-build docker-up docker-down migrate-up migrate-down
+.PHONY: help backend-run backend-test backend-fmt backend-build docker-up docker-down migrate-up migrate-down seed-local
 
 help:
 	@echo "TerraRoute commands:"
@@ -12,6 +12,7 @@ help:
 	@echo "  make docker-down    Stop local services"
 	@echo "  make migrate-up     Apply database migrations"
 	@echo "  make migrate-down   Roll back database migrations"
+	@echo "  make seed-local     Seed local-only demo data"
 
 backend-run:
 	cd backend && go run ./cmd/api
@@ -36,3 +37,6 @@ migrate-up:
 
 migrate-down:
 	docker compose run --rm migrate -path=/migrations -database "$${API_DATABASE_URL:-postgres://terraroute:terraroute_dev_password@postgres:5432/terraroute?sslmode=disable}" down 1
+
+seed-local:
+	docker compose run --rm seed-local
